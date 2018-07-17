@@ -1,3 +1,4 @@
+
 class BoardCase
   #TO DO : la classe a 2 attr_accessor, sa valeur (X, O, ou vide), ainsi que son numéro de case)
   attr_accessor :case_number, :value
@@ -34,11 +35,12 @@ class Board
 
   def display
   #TO DO : afficher le plateau
-  puts " #{board[0]} | #{board[1]} | #{board[2]} "
-  puts "-------"
-  puts " #{board[3]} | #{board[4]} | #{board[5]} "
-  puts "-------"
-  puts " #{board[6]} | #{board[7]} | #{board[8]} "
+  puts " #{boardcases[0].value} | #{boardcases[1].value} | #{boardcases[2].value} "
+  puts "----------"
+  puts " #{boardcases[3].value} | #{boardcases[4].value} | #{boardcases[5].value} "
+  puts "----------"
+  puts " #{boardcases[6].value} | #{boardcases[7].value} | #{boardcases[8].value} "
+  puts "-------------------------------------------"
 
   end
 
@@ -48,9 +50,20 @@ class Board
 
   end
 
-  def victory?
+  def victory?(played_cases, player)
     #TO DO : qui gagne ?
+
+    if played_cases != nil
+      win_state = [[0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,5,8], [2,4,6]]
+      win_state.each do |line|
+        if (line & played_cases).size == 3
+          puts "#{player.name} a gagné !"
+          abort
+        end
+      end
+    end
   end
+end
 
 
 class Player
@@ -59,17 +72,19 @@ class Player
 
   @@symbols = []
 
+
   def initialize
-    if @@symbols.size == 0
-      puts "Player 1: what's your name ?"
-      @name = gets.chomp
-      while !%w(X O).include?(@symbol) do
-        puts "Choose a symbol (X or O)"
-        @symbol = gets.chomp.to_s.upcase
-      end
-      puts "player 1 symbol: #{@symbol}"
-      @@symbols << @symbol
-    else
+    @played_cases = []
+      if @@symbols.size == 0
+    puts "Player 1: what's your name ?"
+    @name = gets.chomp
+    while !%w(X O).include?(@symbol) do
+      puts "Choose a symbol (X or O)"
+      @symbol = gets.chomp.to_s.upcase
+    end
+    puts "player 1 symbol: #{@symbol}"
+    @@symbols << @symbol
+      else
       puts "Player 2: what's your name ?"
       @name = gets.chomp
       @symbol = (%w(X O) - @@symbols)[0]
@@ -81,37 +96,45 @@ end
 class Game
   def initialize
     #TO DO : créé 2 joueurs, créé un board
-    player1 = Player.new
-    player2 = Player.new
-    board = Board.new
-
+    @player1 = Player.new
+    @player2 = Player.new
+    @board = Board.new
+    @free_cases = (1..9).to_a
   end
 
   def go
     # TO DO : lance la partie
-    puts " Rules, enjoy!"
+    puts "Rules, enjoy!"
     puts "here is your board, just choose your case and win!"
     puts " 1 | 2 | 3 "
-    puts "-------"
+    puts "----------"
     puts " 4 | 5 | 6 "
-    puts "-------"
+    puts "----------"
     puts " 7 | 8 | 9 "
-
+    puts "-------------------------------------------"
+    a = [@player1, @player2]
+    turn(a[rand(0..1)])
 
   end
 
-  def turn
+  def turn(player)
     #TO DO : affiche le plateau, demande au joueur il joue quoi, vérifie si un joueur a gagné, passe au joueur suivant si la partie n'est pas finie
-    @win_state = [[0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,5,8], [2,4,6]]
-    @new_turn = player.gets.chomp
-    while !@win_state do @new_turn
 
+    @board.display
 
+    puts "A toi #{player.name}"
+    input = gets.chomp.to_i
+    while !@free_cases.include?(input)
+      puts "Essaye encore!"
+      input = gets.chomp.to_i
+    end
+    @free_cases -= [input]
+    @board.boardcases[input - 1].value = player.symbol
+    player.played_cases << input - 1
+    @board.display
+    @board.victory?(player.played_cases, player)
 
-
-
-
-
+    if player == @player1 then turn(@player2) else turn(@player1) end
   end
 
 end
