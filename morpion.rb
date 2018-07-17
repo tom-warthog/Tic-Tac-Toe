@@ -1,3 +1,4 @@
+require 'pry'
 
 class BoardCase
   #TO DO : la classe a 2 attr_accessor, sa valeur (X, O, ou vide), ainsi que son numéro de case)
@@ -35,12 +36,14 @@ class Board
 
   def display
   #TO DO : afficher le plateau
-  puts " #{boardcases[0].value} | #{boardcases[1].value} | #{boardcases[2].value} "
-  puts "----------"
-  puts " #{boardcases[3].value} | #{boardcases[4].value} | #{boardcases[5].value} "
-  puts "----------"
-  puts " #{boardcases[6].value} | #{boardcases[7].value} | #{boardcases[8].value} "
-  puts "-------------------------------------------"
+  puts "-------------"
+  puts "| #{boardcases[0].value} | #{boardcases[1].value} | #{boardcases[2].value} |"
+  puts "|-----------|"
+  puts "| #{boardcases[3].value} | #{boardcases[4].value} | #{boardcases[5].value} |"
+  puts "|-----------|"
+  puts "| #{boardcases[6].value} | #{boardcases[7].value} | #{boardcases[8].value} |"
+  puts "-------------"
+  puts puts "*" * 40 +" <3"
 
   end
 
@@ -54,13 +57,15 @@ class Board
     #TO DO : qui gagne ?
 
     if played_cases != nil
-      win_state = [[0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,5,8], [2,4,6]]
+      win_state = [[0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6]]
       win_state.each do |line|
         if (line & played_cases).size == 3
           puts "#{player.name} a gagné !"
-          abort
+          return true
         end
+        #binding.pry
       end
+      return false
     end
   end
 end
@@ -68,10 +73,8 @@ end
 
 class Player
   attr_accessor :name, :symbol, :played_cases
-  attr_writer :win
 
   @@symbols = []
-
 
   def initialize
     @played_cases = []
@@ -106,23 +109,26 @@ class Game
     # TO DO : lance la partie
     puts "Rules, enjoy!"
     puts "here is your board, just choose your case and win!"
-    puts " 1 | 2 | 3 "
-    puts "----------"
-    puts " 4 | 5 | 6 "
-    puts "----------"
-    puts " 7 | 8 | 9 "
-    puts "-------------------------------------------"
-    a = [@player1, @player2]
-    turn(a[rand(0..1)])
+    puts "-------------"
+    puts "| 1 | 2 | 3 |"
+    puts "|-----------|"
+    puts "| 4 | 5 | 6 |"
+    puts "|-----------|"
+    puts "| 7 | 8 | 9 |"
+    puts "-------------"
+    puts "=" * 40
 
+    a = [@player1, @player2]
+    rand = rand(0..1)
+    @board.display
+    while !@board.victory?(a[rand].played_cases, a[rand]) do
+      turn(a.rotate![rand])
+    end
   end
 
   def turn(player)
     #TO DO : affiche le plateau, demande au joueur il joue quoi, vérifie si un joueur a gagné, passe au joueur suivant si la partie n'est pas finie
-
-    @board.display
-
-    puts "A toi #{player.name}"
+    puts "A toi #{player.name}!"
     input = gets.chomp.to_i
     while !@free_cases.include?(input)
       puts "Essaye encore!"
@@ -130,13 +136,11 @@ class Game
     end
     @free_cases -= [input]
     @board.boardcases[input - 1].value = player.symbol
+    #On remplace la valeur du boardcase " " contenu dans l'array boardcases,
+    #variable de l'instance @board, par le symbole du joueur
     player.played_cases << input - 1
     @board.display
-    @board.victory?(player.played_cases, player)
-
-    if player == @player1 then turn(@player2) else turn(@player1) end
   end
-
 end
 
 Game.new.go
